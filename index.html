@@ -1,73 +1,99 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>-J-B- / index</title>
-  <style>
-    body { font-family: monospace; background:#111; color:#0f0; padding:20px; }
-    .box { border:1px solid #0f0; padding:20px; width:300px; }
-  </style>
+<meta charset="UTF-8">
+<title>CORE — High‑Speed‑Mess‑Engine</title>
+
+<style>
+    body {
+        margin: 0;
+        background: #000;
+        color: #0f0;
+        font-family: Consolas;
+        padding: 20px;
+    }
+    .box {
+        border: 1px solid #0f0;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; }
+</style>
 </head>
+
 <body>
 
-<h2>-J-B- / index</h2>
+<h1>CORE — High‑Speed‑Mess‑Engine</h1>
 
 <div class="box">
-  <div id="lage"></div>
-  <div id="kontext"></div>
-  <div id="position"></div>
-  <div id="zustand"></div>
-  <hr>
-  <div id="jb"></div>
+    <h2>OSF‑VECTOR Messung</h2>
+    <div>dx: <span id="dx">–</span></div>
+    <div>dy: <span id="dy">–</span></div>
+    <div>dz: <span id="dz">–</span></div>
+    <div>Stabil: <span id="stab">–</span></div>
 </div>
 
-<script>
-function genLAGE() {
-  const raeume = ["A", "B", "C", "D"];
-  return raeume[Math.floor(Math.random() * raeume.length)];
+<div class="box">
+    <h2>QI / IQQ Messung</h2>
+    <div>QI: <span id="qi">–</span></div>
+    <div>IQQ: <span id="iqq">–</span></div>
+</div>
+
+<div class="box">
+    <h2>756‑Achsen‑Messung</h2>
+    <div>Axis‑Drift: <span id="axis">–</span></div>
+</div>
+
+<script type="module">
+import { OSF_VECTOR } from "./OSF.js";
+import { OSF_PHI } from "./OUR.js";
+
+// ---------------------------------------------
+// QI / IQQ
+// ---------------------------------------------
+const QI  = OSF_PHI.VALUE / Math.PI;
+const IQQ = OSF_VECTOR.STABIL();
+
+// ---------------------------------------------
+// OSF‑Richtung
+// ---------------------------------------------
+const DIR = OSF_VECTOR.DIR();
+
+// ---------------------------------------------
+// 756 Achsen erzeugen
+// ---------------------------------------------
+const AXES = [];
+for (let i = 0; i < 756; i++) {
+    AXES.push({
+        x: Math.sin(i * 0.01) * DIR.dx,
+        y: Math.cos(i * 0.01) * DIR.dy,
+        z: Math.sin(i * 0.02) * DIR.dz
+    });
 }
 
-function genKONTEXT() {
-  const kontexte = ["TEST", "LIVE", "PROD"];
-  return kontexte[Math.floor(Math.random() * kontexte.length)];
+// ---------------------------------------------
+// High‑Speed‑Mess‑Engine
+// ---------------------------------------------
+function measure() {
+
+    // OSF‑VECTOR
+    document.getElementById("dx").innerText = DIR.dx.toFixed(4);
+    document.getElementById("dy").innerText = DIR.dy.toFixed(4);
+    document.getElementById("dz").innerText = DIR.dz.toFixed(4);
+    document.getElementById("stab").innerText = IQQ.toFixed(4);
+
+    // QI / IQQ
+    document.getElementById("qi").innerText = QI.toFixed(4);
+    document.getElementById("iqq").innerText = IQQ.toFixed(4);
+
+    // 756‑Achsen‑Drift
+    const drift = AXES[Math.floor(Math.random() * 756)];
+    document.getElementById("axis").innerText =
+        `x:${drift.x.toFixed(3)} y:${drift.y.toFixed(3)} z:${drift.z.toFixed(3)}`;
 }
 
-function genPOSITION() {
-  return Math.floor(Math.random() * 12) + 1;
-}
-
-function genZUSTAND() {
-  const zustaende = [0, 1];
-  return zustaende[Math.floor(Math.random() * zustaende.length)];
-}
-
-function genVierAchsen() {
-  return {
-    LAGE: genLAGE(),
-    KONTEXT: genKONTEXT(),
-    POSITION: genPOSITION(),
-    ZUSTAND: genZUSTAND()
-  };
-}
-
-function JB_AUTO() {
-  const { LAGE, KONTEXT, POSITION, ZUSTAND } = genVierAchsen();
-
-  document.getElementById("lage").innerText = "LAGE: " + LAGE;
-  document.getElementById("kontext").innerText = "KONTEXT: " + KONTEXT;
-  document.getElementById("position").innerText = "POSITION: " + POSITION;
-  document.getElementById("zustand").innerText = "ZUSTAND: " + ZUSTAND;
-
-  const J = (!LAGE || !KONTEXT || !POSITION || !ZUSTAND);
-  const B = !J;
-  const E = "^";
-
-  document.getElementById("jb").innerText = "(J)" + E + "(B) = " + (B ? "OK" : "FEHLT");
-}
-
-JB_AUTO();
+setInterval(measure, 200);
 </script>
 
 </body>
 </html>
-
