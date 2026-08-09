@@ -1,67 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>CORE — High‑Speed‑Mess‑Engine</title>
+<title>CORE · High‑Speed‑Visual‑Mess‑Engine</title>
 
 <style>
-    body {
-        margin: 0;
-        background: #000;
-        color: #0f0;
-        font-family: Consolas;
-        padding: 20px;
-    }
-    .box {
-        border: 1px solid #0f0;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    h2 { margin-top: 0; }
+body {
+    background:#000;
+    color:#0f0;
+    font-family:Consolas, monospace;
+    padding:20px;
+}
+h1 {
+    color:#6cf;
+    text-shadow:0 0 12px #6cf;
+    text-align:center;
+}
+.box {
+    background:#0b0b0b;
+    border:1px solid #222;
+    padding:20px;
+    margin-bottom:25px;
+    border-radius:8px;
+}
+.value {
+    font-size:18px;
+    margin:6px 0;
+}
+#canvas {
+    width:100%;
+    height:300px;
+    background:#000;
+    border:1px solid #333;
+}
 </style>
 </head>
 
 <body>
 
-<h1>CORE — High‑Speed‑Mess‑Engine</h1>
+<h1>CORE · High‑Speed‑Visual‑Mess‑Engine</h1>
 
 <div class="box">
-    <h2>OSF‑VECTOR Messung</h2>
-    <div>dx: <span id="dx">–</span></div>
-    <div>dy: <span id="dy">–</span></div>
-    <div>dz: <span id="dz">–</span></div>
-    <div>Stabil: <span id="stab">–</span></div>
+    <h2>OSF‑VECTOR · Live‑Messung</h2>
+    <div class="value">dx: <span id="dx">–</span></div>
+    <div class="value">dy: <span id="dy">–</span></div>
+    <div class="value">dz: <span id="dz">–</span></div>
+    <div class="value">Stabilität: <span id="stab">–</span></div>
 </div>
 
 <div class="box">
-    <h2>QI / IQQ Messung</h2>
-    <div>QI: <span id="qi">–</span></div>
-    <div>IQQ: <span id="iqq">–</span></div>
+    <h2>QI / IQQ · Öffnung / Schließung</h2>
+    <div class="value">QI: <span id="qi">–</span></div>
+    <div class="value">IQQ: <span id="iqq">–</span></div>
 </div>
 
 <div class="box">
-    <h2>756‑Achsen‑Messung</h2>
-    <div>Axis‑Drift: <span id="axis">–</span></div>
+    <h2>756‑Achsen‑Drift · Visual‑Panel</h2>
+    <canvas id="canvas"></canvas>
 </div>
 
 <script type="module">
 import { OSF_VECTOR } from "./OSF.js";
 import { OSF_PHI } from "./OUR.js";
 
-// ---------------------------------------------
 // QI / IQQ
-// ---------------------------------------------
 const QI  = OSF_PHI.VALUE / Math.PI;
 const IQQ = OSF_VECTOR.STABIL();
 
-// ---------------------------------------------
 // OSF‑Richtung
-// ---------------------------------------------
 const DIR = OSF_VECTOR.DIR();
 
-// ---------------------------------------------
 // 756 Achsen erzeugen
-// ---------------------------------------------
 const AXES = [];
 for (let i = 0; i < 756; i++) {
     AXES.push({
@@ -71,9 +80,35 @@ for (let i = 0; i < 756; i++) {
     });
 }
 
-// ---------------------------------------------
+// Canvas
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+// Visual‑Engine
+function drawAxis(axis) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    const px = cx + axis.x * 120;
+    const py = cy + axis.y * 120;
+
+    ctx.strokeStyle = "#0f0";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+
+    ctx.fillStyle = "#6cf";
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.fill();
+}
+
 // High‑Speed‑Mess‑Engine
-// ---------------------------------------------
 function measure() {
 
     // OSF‑VECTOR
@@ -86,13 +121,14 @@ function measure() {
     document.getElementById("qi").innerText = QI.toFixed(4);
     document.getElementById("iqq").innerText = IQQ.toFixed(4);
 
-    // 756‑Achsen‑Drift
+    // Drift‑Achse wählen
     const drift = AXES[Math.floor(Math.random() * 756)];
-    document.getElementById("axis").innerText =
-        `x:${drift.x.toFixed(3)} y:${drift.y.toFixed(3)} z:${drift.z.toFixed(3)}`;
+
+    // Visualisieren
+    drawAxis(drift);
 }
 
-setInterval(measure, 200);
+setInterval(measure, 120);
 </script>
 
 </body>
